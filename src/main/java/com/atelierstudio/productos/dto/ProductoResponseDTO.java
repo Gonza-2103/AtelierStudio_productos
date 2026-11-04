@@ -16,7 +16,7 @@ public class ProductoResponseDTO {
     private String descripcion;
     private String tecnica;
     private String medidas;
-    private Double precio;
+    private Integer precio;
     private Integer stock;
     private String imagen;
     private String autor;
