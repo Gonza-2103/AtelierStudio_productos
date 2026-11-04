@@ -15,7 +15,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    //1. Manejo de errores de validación de Jakarta (@Valid en ProductoRequestDTO)
+    //1. Manejo de errores de validación de Jakarta
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
@@ -26,45 +26,45 @@ public class GlobalExceptionHandler {
 
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Error de validación");
-        response.put("errors", fieldErrors);
+        response.put("STATUS", HttpStatus.BAD_REQUEST.value());
+        response.put("ERROR", "Error de validación");
+        response.put("ERRORES", fieldErrors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    //2. Manejo de recursos no encontrados (ej. RuntimeException lanzadas desde ProductoService)
+    //2. Manejo de recursos no encontrados
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity handleRuntimeExceptions(RuntimeException ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-        response.put("error", "Recurso no encontrado");
-        response.put("message", ex.getMessage());
+        response.put("STATUS", HttpStatus.NOT_FOUND.value());
+        response.put("ERROR", "Recurso no encontrado");
+        response.put("MENSAJE", ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    //3. Manejo de tipos de datos incorrectos en parámetros URL (ej. /api/productos/abc en vez de un número)
+    //3. Manejo de tipos de datos incorrectos en parámetros URL
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Parámetro inválido");
-        response.put("message", String.format("El parámetro '%s' debe ser de tipo numérico", ex.getName()));
+        response.put("STATUS", HttpStatus.BAD_REQUEST.value());
+        response.put("ERROR", "Parámetro inválido");
+        response.put("MENSAJE", String.format("El parámetro '%s' debe ser de tipo numérico", ex.getName()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    //4. Manejo general de excepciones no controladas (Error 500)
+    //4. Manejo general de excepciones no controladas
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleGeneralExceptions(Exception ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "Error interno del servidor");
-        response.put("message", "Ocurrió un error inesperado. Intente más tarde.");
+        response.put("STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.put("ERROR", "Error interno del servidor");
+        response.put("MENSAJE", "Ocurrió un error inesperado. Intente más tarde.");
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
