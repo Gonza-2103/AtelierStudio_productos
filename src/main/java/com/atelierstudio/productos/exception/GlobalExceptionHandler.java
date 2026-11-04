@@ -33,9 +33,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    //2. Manejo de recursos no encontrados
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity handleRuntimeExceptions(RuntimeException ex) {
+    //2. Manejo de recurso no encontrado personalizado (404)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity handleResourceNotFoundException(ResourceNotFoundException ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("STATUS", HttpStatus.NOT_FOUND.value());
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    //3. Manejo de tipos de datos incorrectos en parámetros URL
+    //3. Manejo de tipos de datos incorrectos en parámetros URL (400)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    //4. Manejo general de excepciones no controladas
+    //4. Manejo general de excepciones no controladas (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleGeneralExceptions(Exception ex) {
         Map<String, Object> response = new HashMap<>();

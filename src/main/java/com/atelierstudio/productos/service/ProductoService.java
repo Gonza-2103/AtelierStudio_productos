@@ -3,6 +3,7 @@ package com.atelierstudio.productos.service;
 import com.atelierstudio.productos.assembler.ProductoModelAssembler;
 import com.atelierstudio.productos.dto.ProductoRequestDTO;
 import com.atelierstudio.productos.dto.ProductoResponseDTO;
+import com.atelierstudio.productos.exception.ResourceNotFoundException;
 import com.atelierstudio.productos.model.Producto;
 import com.atelierstudio.productos.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Producto con ID {} no fue encontrado", id);
-                    return new RuntimeException("Producto no encontrado con el ID: " + id);
+                    return new ResourceNotFoundException("Producto no encontrado con el ID: " + id);
                 });
         return productoAssembler.toResponseDTO(producto);
     }
@@ -45,9 +46,7 @@ public class ProductoService {
     @Transactional(readOnly = true)
     public List<ProductoResponseDTO> listarPorTecnica(String tecnica) {
         log.info("Filtrando productos por técnica: {}", tecnica);
-        List<Producto> productosFiltrados = productoRepository.findAll().stream()
-                .filter(p -> p.getTecnica() != null && p.getTecnica().equalsIgnoreCase(tecnica))
-                .toList();
+        List<Producto> productosFiltrados = productoRepository.findByTecnicaIgnoreCase(tecnica);
         log.debug("Se encontraron {} productos con la técnica '{}'", productosFiltrados.size(), tecnica);
         return productoAssembler.toResponseDTOList(productosFiltrados);
     }
@@ -69,7 +68,7 @@ public class ProductoService {
         Producto productoExistente = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("No se pudo actualizar. Obra con ID {} no encontrada", id);
-                    return new RuntimeException("No se puede actualizar. Producto no encontrado con ID: " + id);
+                    return new ResourceNotFoundException("No se puede actualizar. Producto no encontrado con ID: " + id);
                 });
 
         productoExistente.setTitulo(request.getTitulo());
@@ -92,7 +91,7 @@ public class ProductoService {
         log.info("Solicitud para eliminar producto con ID: {}", id);
         if (!productoRepository.existsById(id)) {
             log.warn("No se pudo eliminar. Obra con ID {} no encontrada", id);
-            throw new RuntimeException("No se puede eliminar. Producto no encontrado con ID: " + id);
+            throw new ResourceNotFoundException("No se puede eliminar. Producto no encontrado con ID: " + id);
         }
 
         productoRepository.deleteById(id);

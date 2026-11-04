@@ -12,10 +12,9 @@ import java.util.List;
 @Component
 public class ProductoModelAssembler {
 
-    /**
-     * Transforma un ProductoRequestDTO (enviado desde el formulario de React)
-     * en una entidad Producto para persistencia o almacenamiento en memoria.
-     */
+    /* 1. Transforma un ProductoRequestDTO (enviado desde el formulario de React)
+       en una entidad Producto para persistencia o almacenamiento en memoria. */
+
     public Producto toEntity(ProductoRequestDTO dto) {
         if (dto == null) {
             return null;
@@ -33,10 +32,10 @@ public class ProductoModelAssembler {
                 .build();
     }
 
-    /**
-     * Transforma una entidad Producto en un ProductoResponseDTO para enviar
-     * al catálogo, modal de detalles o tabla administrativa de React.
-     */
+
+    /* 2. Transforma una entidad Producto en un ProductoResponseDTO para enviar
+       al catálogo, modal de detalles o tabla administrativa de React.  */
+
     public ProductoResponseDTO toResponseDTO(Producto entity) {
         if (entity == null) {
             return null;
@@ -55,10 +54,10 @@ public class ProductoModelAssembler {
                 .build();
     }
 
-    /**
-     * Convierte una lista completa de entidades a una lista de ProductoResponseDTO
-     * para el renderizado del catálogo o la grilla de administración.
-     */
+
+    /* 3. Convierte una lista completa de entidades a una lista de ProductoResponseDTO
+       para el renderizado del catálogo o la grilla de administración. */
+
     public List<ProductoResponseDTO> toResponseDTOList(List<Producto> entities) {
         if (entities == null || entities.isEmpty()) {
             return Collections.emptyList();
