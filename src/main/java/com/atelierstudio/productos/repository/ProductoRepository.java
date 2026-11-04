@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Integer> {
 
-    // Método de búsqueda personalizado por técnica artística (útil para AtelierStudio)
+    //Método de búsqueda personalizado por técnica artística (útil para AtelierStudio)
     List<Producto> findByTecnicaIgnoreCase(String tecnica);
 }
