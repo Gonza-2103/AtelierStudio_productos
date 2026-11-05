@@ -1,18 +1,15 @@
 package com.atelierstudio.productos.controller;
 
+import com.atelierstudio.productos.util.ProductoDataFaker;
 import com.atelierstudio.productos.dto.ProductoRequestDTO;
-import com.atelierstudio.productos.dto.ProductoResponseDTO;
-import com.atelierstudio.productos.exception.GlobalExceptionHandler;
 import com.atelierstudio.productos.exception.ResourceNotFoundException;
 import com.atelierstudio.productos.service.ProductoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,13 +18,14 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ProductoController.class)
-@Import(GlobalExceptionHandler.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 class ProductoControllerTest {
 
     @Autowired
@@ -39,55 +37,28 @@ class ProductoControllerTest {
     @MockitoBean
     private ProductoService productoService;
 
-    private ProductoResponseDTO responseDTO;
-    private ProductoRequestDTO requestValidoDTO;
-
-    @BeforeEach
-    void setUp() {
-        responseDTO = ProductoResponseDTO.builder()
-                .id(1)
-                .titulo("Cuadro 'Mar y Playa'")
-                .descripcion("Fotografía aérea en plano cenital que captura el contraste entre las aguas turquesas del océano y la orilla de arena blanca...")
-                .tecnica("Fotografía Artística")
-                .medidas("60x40 cm")
-                .precio(45000)
-                .stock(5)
-                .imagen("/img/mar-y-playa.jpg")
-                .autor("Artista Local")
-                .build();
-
-        requestValidoDTO = ProductoRequestDTO.builder()
-                .titulo("Cuadro 'Mar y Playa'")
-                .descripcion("Fotografía aérea en plano cenital que captura el contraste entre las aguas turquesas del océano y la orilla de arena blanca...")
-                .tecnica("Fotografía Artística")
-                .medidas("60x40 cm")
-                .precio(45000)
-                .stock(5)
-                .imagen("/img/mar-y-playa.jpg")
-                .autor("Artista Local")
-                .build();
-    }
-
     @Test
-    @DisplayName("GET /api/productos - Debe retornar 200 OK con la lista de obras")
+    @DisplayName("GET /api/productos - Debe retornar 200 OK con la lista de obras usando Faker")
     void testListarTodos() throws Exception {
-        when(productoService.listarTodos()).thenReturn(List.of(responseDTO));
+        when(productoService.listarTodos()).thenReturn(ProductoDataFaker.mockListaResponseDTO());
 
         mockMvc.perform(get("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].titulo", is("Cuadro 'Mar y Playa'")))
-                .andExpect(jsonPath("$[0].precio", is(45000)));
+                .andExpect(jsonPath("$[0].precio", is(45000)))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].titulo", is("Retrato 'Caballero con Pipa'")));
 
         verify(productoService, times(1)).listarTodos();
     }
 
     @Test
-    @DisplayName("GET /api/productos/{id} - Debe retornar 200 OK cuando la obra existe")
+    @DisplayName("GET /api/productos/{id} - Debe retornar 200 OK cuando la obra existe usando Faker")
     void testObtenerPorIdExitoso() throws Exception {
-        when(productoService.obtenerPorId(1)).thenReturn(responseDTO);
+        when(productoService.obtenerPorId(1)).thenReturn(ProductoDataFaker.mockProductoResponseDTO());
 
         mockMvc.perform(get("/api/productos/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -100,7 +71,7 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/productos/{id} - Debe retornar 404 NOT FOUND con estructura de GlobalExceptionHandler cuando no existe")
+    @DisplayName("GET /api/productos/{id} - Debe retornar 404 NOT FOUND cuando la obra no existe")
     void testObtenerPorIdNoEncontrado() throws Exception {
         when(productoService.obtenerPorId(99))
                 .thenThrow(new ResourceNotFoundException("Producto no encontrado con el ID: 99"));
@@ -116,9 +87,10 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/productos/tecnica/{tecnica} - Debe retornar 200 OK con las obras filtradas")
+    @DisplayName("GET /api/productos/tecnica/{tecnica} - Debe retornar 200 OK con obras filtradas")
     void testListarPorTecnica() throws Exception {
-        when(productoService.listarPorTecnica("Fotografía Artística")).thenReturn(List.of(responseDTO));
+        when(productoService.listarPorTecnica("Fotografía Artística"))
+                .thenReturn(List.of(ProductoDataFaker.mockProductoResponseDTO()));
 
         mockMvc.perform(get("/api/productos/tecnica/{tecnica}", "Fotografía Artística")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -130,13 +102,14 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/productos - Debe retornar 201 CREATED al registrar una obra válida")
+    @DisplayName("POST /api/productos - Debe retornar 201 CREATED al enviar un DTO válido con Faker")
     void testCrearProductoExitoso() throws Exception {
-        when(productoService.crear(any(ProductoRequestDTO.class))).thenReturn(responseDTO);
+        // AQUÍ SE USA: ProductoDataFaker.mockProductoRequestValido() y mockProductoResponseDTO()
+        when(productoService.crear(any(ProductoRequestDTO.class))).thenReturn(ProductoDataFaker.mockProductoResponseDTO());
 
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestValidoDTO)))
+                        .content(objectMapper.writeValueAsString(ProductoDataFaker.mockProductoRequestValido())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.titulo", is("Cuadro 'Mar y Playa'")));
@@ -145,22 +118,12 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/productos - Debe retornar 400 BAD REQUEST con mapa de errores al fallar Jakarta Validation")
+    @DisplayName("POST /api/productos - Debe retornar 400 BAD REQUEST al fallar validaciones de Jakarta")
     void testCrearProductoValidacionFallida() throws Exception {
-        ProductoRequestDTO requestInvalido = ProductoRequestDTO.builder()
-                .titulo("") // @NotBlank violado
-                .descripcion("Corta") // @Size min 10 violado
-                .tecnica("")
-                .medidas("")
-                .precio(0) // @Min(1) violado
-                .stock(-1) // @Min(0) violado
-                .imagen("")
-                .autor("")
-                .build();
-
+        // AQUÍ SE USA: ProductoDataFaker.mockProductoRequestInvalido()
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestInvalido)))
+                        .content(objectMapper.writeValueAsString(ProductoDataFaker.mockProductoRequestInvalido())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.STATUS", is(400)))
                 .andExpect(jsonPath("$.ERROR", is("Error de validación")))
@@ -172,13 +135,13 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/productos/{id} - Debe retornar 200 OK al actualizar una obra existente")
+    @DisplayName("PUT /api/productos/{id} - Debe retornar 200 OK al actualizar una obra")
     void testActualizarProductoExitoso() throws Exception {
-        when(productoService.actualizar(eq(1), any(ProductoRequestDTO.class))).thenReturn(responseDTO);
+        when(productoService.actualizar(eq(1), any(ProductoRequestDTO.class))).thenReturn(ProductoDataFaker.mockProductoResponseDTO());
 
         mockMvc.perform(put("/api/productos/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestValidoDTO)))
+                        .content(objectMapper.writeValueAsString(ProductoDataFaker.mockProductoRequestValido())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.titulo", is("Cuadro 'Mar y Playa'")));
