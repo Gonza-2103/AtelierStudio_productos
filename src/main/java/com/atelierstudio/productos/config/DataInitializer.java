@@ -1,79 +1,97 @@
 package com.atelierstudio.productos.config;
 
+import com.atelierstudio.productos.model.Categoria;
 import com.atelierstudio.productos.model.Producto;
+import com.atelierstudio.productos.repository.CategoriaRepository;
 import com.atelierstudio.productos.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DataInitializer implements CommandLineRunner {
 
     private final ProductoRepository productoRepository;
+    private final CategoriaRepository categoriaRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 
-        //Evita duplicar datos si la base de datos ya contiene registros
+        //1. Crear y guardar las 3 categorías reales mostradas en AtelierStudioReact
+        Categoria pinturaOleo = obtenerOCrearCategoria(
+                "Pintura al Óleo",
+                "Obras pictóricas tradicionales y expresivas realizadas al óleo sobre lienzo."
+        );
+
+        Categoria acuarelaMixta = obtenerOCrearCategoria(
+                "Acuarela y Técnica Mixta",
+                "Ilustraciones luminosas combinando pigmentos al agua y técnicas mixtas."
+        );
+
+        Categoria fotografiaArtistica = obtenerOCrearCategoria(
+                "Fotografía Artística",
+                "Capturas fotográficas de autor en edición limitada y alta resolución."
+        );
+
+        //2. Validar si ya existen productos para no duplicarlos al reiniciar
         if (productoRepository.count() > 0) {
             log.info("DataInitializer: El catálogo de AtelierStudio ya contiene datos. Omitiendo carga inicial.");
             return;
         }
 
-        log.info("DataInitializer: Inicializando catálogo de obras de arte para AtelierStudio...");
-
-        List<Producto> catalogoInicial = List.of(
-                Producto.builder()
-                        .titulo("Cuadro 'Mar y Playa'")
-                        .descripcion("Fotografía aérea que captura el contraste entre el turquesa del océano y la arena blanca...")
-                        .tecnica("Fotografía Artística")
-                        .medidas("60x40 cm")
-                        .precio(45000)
-                        .stock(10)
-                        .imagen("/img/mar-y-playa.jpg")
-                        .autor("Artista Local")
-                        .build(),
-
-                Producto.builder()
-                        .titulo("Retrato 'Caballero con Pipa'")
-                        .descripcion("Pintura al óleo de estilo expresivo que retrata a un marinero de mirada reflexiva...")
-                        .tecnica("Pintura al Óleo")
-                        .medidas("50x70 cm")
-                        .precio(60000)
-                        .stock(8)
-                        .imagen("/img/caballero-pipa.jpg")
-                        .autor("Artista Local")
-                        .build(),
-
+        //3. Cargar los productos que tiene el local
+        List<Producto> productosIniciales = List.of(
                 Producto.builder()
                         .titulo("Cuadro 'Paisaje de Montaña'")
-                        .descripcion("Pintura paisajística al óleo que muestra una cordillera nevada reflejada en un lago...")
-                        .tecnica("Pintura al Óleo")
-                        .medidas("80x60 cm")
+                        .descripcion("Pintura paisajística tradicional al óleo que muestra una cordillera alpina nevada reflejada en un lago...")
                         .precio(48000)
-                        .stock(6)
-                        .imagen("/img/paisaje-montana.jpg")
-                        .autor("Artista Local")
+                        .stock(10)
+                        .categoria(pinturaOleo)
                         .build(),
 
                 Producto.builder()
                         .titulo("Retrato 'Gato entre Sombras'")
                         .descripcion("Acuarela luminosa que ilustra a un gato atigrado de pelaje naranja y blanco...")
-                        .tecnica("Acuarela y Técnica Mixta")
-                        .medidas("40x50 cm")
                         .precio(72000)
-                        .stock(6)
-                        .imagen("/img/gato-sombras.jpg")
-                        .autor("Artista Local")
+                        .stock(10)
+                        .categoria(acuarelaMixta)
+                        .build(),
+
+                Producto.builder()
+                        .titulo("Cuadro 'Mar y Playa'")
+                        .descripcion("Fotografía aérea en plano cenital que captura el contraste entre las aguas turquesas del océano y la orilla de arena blanca...")
+                        .precio(45000)
+                        .stock(10)
+                        .categoria(fotografiaArtistica)
+                        .build(),
+
+                Producto.builder()
+                        .titulo("Retrato 'Caballero con Pipa'")
+                        .descripcion("Pintura al óleo de estilo expresivo que retrata de perfil a un marinero o pescador de mirada reflexiva...")
+                        .precio(60000)
+                        .stock(10)
+                        .categoria(pinturaOleo)
                         .build()
         );
 
-        productoRepository.saveAll(catalogoInicial);
-        log.info("DataInitializer: Se han precargado exitosamente {} obras de arte en AtelierStudio.", catalogoInicial.size());
+        productoRepository.saveAll(productosIniciales);
+        log.info("DataInitializer: Categorías y {} productos obligatorios de AtelierStudio cargados correctamente.", productosIniciales.size());
+    }
+
+    //Busca la categoría por nombre; si no existe en MySQL, la crea y retorna con su ID
+    private Categoria obtenerOCrearCategoria(String nombre, String descripcion) {
+        return categoriaRepository.findByNombre(nombre)
+                .orElseGet(() -> categoriaRepository.save(
+                        Categoria.builder()
+                                .nombre(nombre)
+                                .descripcion(descripcion)
+                                .build()
+                ));
     }
 }
