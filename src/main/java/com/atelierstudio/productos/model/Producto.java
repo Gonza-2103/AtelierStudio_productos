@@ -46,4 +46,8 @@ public class Producto {
     private String imagen;
 
     private String autor;
+
+    @ManyToOne(fetch = FetchType.EAGER)  //EAGER asegura que al consultar el producto traiga los datos de su categoría
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
 }
