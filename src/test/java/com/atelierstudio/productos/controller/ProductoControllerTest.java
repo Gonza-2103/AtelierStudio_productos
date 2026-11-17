@@ -24,8 +24,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(properties = {
+        "eureka.client.enabled=false",
+        "spring.cloud.discovery.enabled=false",
+        "spring.cloud.service-registry.auto-registration.enabled=false"
+})
+@AutoConfigureMockMvc(addFilters = false)
 class ProductoControllerTest {
 
     @Autowired
@@ -38,11 +42,11 @@ class ProductoControllerTest {
     private ProductoService productoService;
 
     @Test
-    @DisplayName("GET /api/productos - Debe retornar 200 OK con la lista de obras usando Faker")
+    @DisplayName("GET /api/v1/productos - Debe retornar 200 OK con la lista de obras usando Faker")
     void testListarTodos() throws Exception {
         when(productoService.listarTodos()).thenReturn(ProductoDataFaker.mockListaResponseDTO());
 
-        mockMvc.perform(get("/api/productos")
+        mockMvc.perform(get("/api/v1/productos")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -56,11 +60,11 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/productos/{id} - Debe retornar 200 OK cuando la obra existe usando Faker")
+    @DisplayName("GET /api/v1/productos/{id} - Debe retornar 200 OK cuando la obra existe usando Faker")
     void testObtenerPorIdExitoso() throws Exception {
         when(productoService.obtenerPorId(1)).thenReturn(ProductoDataFaker.mockProductoResponseDTO());
 
-        mockMvc.perform(get("/api/productos/{id}", 1)
+        mockMvc.perform(get("/api/v1/productos/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
@@ -71,12 +75,12 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/productos/{id} - Debe retornar 404 NOT FOUND cuando la obra no existe")
+    @DisplayName("GET /api/v1/productos/{id} - Debe retornar 404 NOT FOUND cuando la obra no existe")
     void testObtenerPorIdNoEncontrado() throws Exception {
         when(productoService.obtenerPorId(99))
                 .thenThrow(new ResourceNotFoundException("Producto no encontrado con el ID: 99"));
 
-        mockMvc.perform(get("/api/productos/{id}", 99)
+        mockMvc.perform(get("/api/v1/productos/{id}", 99)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.STATUS", is(404)))
@@ -87,12 +91,12 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/productos/tecnica/{tecnica} - Debe retornar 200 OK con obras filtradas")
+    @DisplayName("GET /api/v1/productos/tecnica/{tecnica} - Debe retornar 200 OK con obras filtradas")
     void testListarPorTecnica() throws Exception {
         when(productoService.listarPorTecnica("Fotografía Artística"))
                 .thenReturn(List.of(ProductoDataFaker.mockProductoResponseDTO()));
 
-        mockMvc.perform(get("/api/productos/tecnica/{tecnica}", "Fotografía Artística")
+        mockMvc.perform(get("/api/v1/productos/tecnica/{tecnica}", "Fotografía Artística")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -102,12 +106,11 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/productos - Debe retornar 201 CREATED al enviar un DTO válido con Faker")
+    @DisplayName("POST /api/v1/productos - Debe retornar 201 CREATED al enviar un DTO válido con Faker")
     void testCrearProductoExitoso() throws Exception {
-        // AQUÍ SE USA: ProductoDataFaker.mockProductoRequestValido() y mockProductoResponseDTO()
         when(productoService.crear(any(ProductoRequestDTO.class))).thenReturn(ProductoDataFaker.mockProductoResponseDTO());
 
-        mockMvc.perform(post("/api/productos")
+        mockMvc.perform(post("/api/v1/productos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ProductoDataFaker.mockProductoRequestValido())))
                 .andExpect(status().isCreated())
@@ -118,10 +121,10 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/productos - Debe retornar 400 BAD REQUEST al fallar validaciones de Jakarta")
+    @DisplayName("POST /api/v1/productos - Debe retornar 400 BAD REQUEST al fallar validaciones de Jakarta")
     void testCrearProductoValidacionFallida() throws Exception {
         // AQUÍ SE USA: ProductoDataFaker.mockProductoRequestInvalido()
-        mockMvc.perform(post("/api/productos")
+        mockMvc.perform(post("/api/v1/productos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ProductoDataFaker.mockProductoRequestInvalido())))
                 .andExpect(status().isBadRequest())
@@ -135,11 +138,11 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/productos/{id} - Debe retornar 200 OK al actualizar una obra")
+    @DisplayName("PUT /api/v1/productos/{id} - Debe retornar 200 OK al actualizar una obra")
     void testActualizarProductoExitoso() throws Exception {
         when(productoService.actualizar(eq(1), any(ProductoRequestDTO.class))).thenReturn(ProductoDataFaker.mockProductoResponseDTO());
 
-        mockMvc.perform(put("/api/productos/{id}", 1)
+        mockMvc.perform(put("/api/v1/productos/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ProductoDataFaker.mockProductoRequestValido())))
                 .andExpect(status().isOk())
@@ -150,11 +153,11 @@ class ProductoControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/productos/{id} - Debe retornar 204 NO CONTENT al eliminar")
+    @DisplayName("DELETE /api/v1/productos/{id} - Debe retornar 204 NO CONTENT al eliminar")
     void testEliminarProductoExitoso() throws Exception {
         doNothing().when(productoService).eliminar(1);
 
-        mockMvc.perform(delete("/api/productos/{id}", 1))
+        mockMvc.perform(delete("/api/v1/productos/{id}", 1))
                 .andExpect(status().isNoContent());
 
         verify(productoService, times(1)).eliminar(1);

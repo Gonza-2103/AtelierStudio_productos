@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -52,6 +51,8 @@ public class DataInitializer implements CommandLineRunner {
                         .descripcion("Pintura paisajística tradicional al óleo que muestra una cordillera alpina nevada reflejada en un lago...")
                         .precio(48000)
                         .stock(10)
+                        .tecnica("Pintura al Óleo")
+                        .imagen("/img/paisaje-montana.jpg")
                         .categoria(pinturaOleo)
                         .build(),
 
@@ -60,6 +61,8 @@ public class DataInitializer implements CommandLineRunner {
                         .descripcion("Acuarela luminosa que ilustra a un gato atigrado de pelaje naranja y blanco...")
                         .precio(72000)
                         .stock(10)
+                        .tecnica("Acuarela y Técnica Mixta")
+                        .imagen("/img/gato-sombras.jpg")
                         .categoria(acuarelaMixta)
                         .build(),
 
@@ -68,6 +71,8 @@ public class DataInitializer implements CommandLineRunner {
                         .descripcion("Fotografía aérea en plano cenital que captura el contraste entre las aguas turquesas del océano y la orilla de arena blanca...")
                         .precio(45000)
                         .stock(10)
+                        .tecnica("Fotografía Artística")
+                        .imagen("/img/mar-playa.jpg")
                         .categoria(fotografiaArtistica)
                         .build(),
 
@@ -76,6 +81,8 @@ public class DataInitializer implements CommandLineRunner {
                         .descripcion("Pintura al óleo de estilo expresivo que retrata de perfil a un marinero o pescador de mirada reflexiva...")
                         .precio(60000)
                         .stock(10)
+                        .tecnica("Pintura al Óleo")
+                        .imagen("/img/caballero-pipa.jpg")
                         .categoria(pinturaOleo)
                         .build()
         );

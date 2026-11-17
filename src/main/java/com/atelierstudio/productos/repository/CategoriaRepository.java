@@ -9,9 +9,9 @@ import java.util.Optional;
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
-    // Busca una categoría por su nombre exacto (ej. "Pintura")
+    //Busca una categoría por su nombre exacto (ej. "Pintura")
     Optional<Categoria> findByNombre(String nombre);
 
-    // Verifica si ya existe una categoría con ese nombre antes de insertarla
+    //Verifica si ya existe una categoría con ese nombre antes de insertarla
     boolean existsByNombre(String nombre);
 }

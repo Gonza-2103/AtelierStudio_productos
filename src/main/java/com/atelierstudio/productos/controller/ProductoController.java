@@ -33,11 +33,10 @@ public class ProductoController {
     }
 
     //3. Filtrar por técnica artística (Filtros del catálogo en React)
-    /*@GetMapping("/tecnica/{tecnica}")
+    @GetMapping("/tecnica/{tecnica}")
     public ResponseEntity<List<ProductoResponseDTO>> listarPorTecnica(@PathVariable String tecnica) {
-        List<ProductoResponseDTO> productos = productoService.listarPorTecnica(tecnica);
-        return ResponseEntity.ok(productos);
-    }*/
+        return ResponseEntity.ok(productoService.listarPorTecnica(tecnica));
+    }
 
     //4. Crear nuevo producto (Formulario de administración)
     @PostMapping
