@@ -17,6 +17,7 @@ public class CorsConfig {
                                 "http://localhost:3000",
                                 "http://atelierstudio-react.s3-website-us-east-1.amazonaws.com"
                         )  //Puertos por defecto de Vite y Create-React-App
+
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
