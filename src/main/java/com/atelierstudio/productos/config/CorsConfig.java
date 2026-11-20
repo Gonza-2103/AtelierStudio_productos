@@ -12,8 +12,11 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/v1/**") // Aplica a todos los endpoints de nuestra API
-                        .allowedOrigins("http://localhost:5173", "http://localhost:3000") // Puertos por defecto de Vite y Create-React-App
+                registry.addMapping("/api/v1/**")  //Aplica a todos los endpoints de nuestra API
+                        .allowedOrigins("http://localhost:5173",
+                                "http://localhost:3000",
+                                "http://atelierstudio-react.s3-website-us-east-1.amazonaws.com"
+                        )  //Puertos por defecto de Vite y Create-React-App
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
