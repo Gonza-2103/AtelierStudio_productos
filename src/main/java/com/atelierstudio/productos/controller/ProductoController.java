@@ -14,7 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/productos")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "http://atelierstudio-react.s3-website-us-east-1.amazonaws.com"
+})
 @RequiredArgsConstructor
 @Tag(name = "Productos v1", description = "Gestión del catálogo de obras y productos de AtelierStudio")
 public class ProductoController {
